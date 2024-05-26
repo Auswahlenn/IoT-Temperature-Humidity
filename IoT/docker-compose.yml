@@ -1,0 +1,54 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    hostname: mosquitto
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  telegraf:
+    image: docker.io/telegraf:latest
+    container_name: telegraf   
+    # environment:
+    #   - HOST_PROC=/host/proc
+    #   - HOST_SYS=/host/sys
+    #   - HOST_ETC=/host/etc
+    #   - HOST_MOUNT_PREFIX=/host
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      # - /proc:/host/proc:ro
+      # - /sys:/host/sys:ro
+      # - /etc:/host/etc:ro
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=data
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=adminadmin
+      - INFLUXDB_USER=admin
+      - INFLUXDB_USER_PASSWORD=adminadmin
+    volumes:
+      - ./influxdb_data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  grafana-data:  
